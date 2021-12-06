@@ -498,16 +498,7 @@ let input = `529,822 -> 529,562
 191,837 -> 561,837
 605,639 -> 240,274
 906,28 -> 906,957`;
-input = `0,9 -> 5,9
-8,0 -> 0,8
-9,4 -> 3,4
-2,2 -> 2,1
-7,0 -> 7,4
-6,4 -> 2,0
-0,9 -> 2,9
-3,4 -> 1,4
-0,0 -> 8,8
-5,5 -> 8,2`;
+
 input = input.split('\n').map((e) => {
     const [a, b] = e.split('->');
     const [x1, y1] = a.split(',');
@@ -519,58 +510,59 @@ input = input.split('\n').map((e) => {
         y2: Number(y2)
     };
 });
-const obj = {};
+const solve = (calcDiagonal) => {
+    const obj = {};
 
-input.forEach(({ x1, y1, x2, y2 }) => {
-    const xMin = Math.min(x1, x2);
-    const xMax = Math.max(x1, x2);
+    input.forEach(({ x1, y1, x2, y2 }) => {
+        const xMin = Math.min(x1, x2);
+        const xMax = Math.max(x1, x2);
 
-    const yMin = Math.min(y1, y2);
-    const yMax = Math.max(y1, y2);
+        const yMin = Math.min(y1, y2);
+        const yMax = Math.max(y1, y2);
 
-    const xDistance = xMax - xMin;
-    const yDistance = yMax - yMin;
+        const xDistance = xMax - xMin;
+        const yDistance = yMax - yMin;
 
-    const isVertical = xDistance === 0 || yDistance === 0;
-    if (isVertical) {
-        if (xDistance === 0) {
-            for (let i = 0; i <= yDistance; i++) {
-                obj[x1] = obj[x1] ?? [];
-                obj[x1][yMin + i] = obj[x1][yMin + i] ?? 0;
+        const isVertical = xDistance === 0 || yDistance === 0;
+        if (isVertical) {
+            if (xDistance === 0) {
+                for (let i = 0; i <= yDistance; i++) {
+                    obj[x1] = obj[x1] ?? [];
+                    obj[x1][yMin + i] = obj[x1][yMin + i] ?? 0;
 
-                obj[x1][yMin + i] = obj[x1][yMin + i] + 1;
-                obj[x1] = JSON.parse(JSON.stringify(obj[x1])).map((e) => e ?? 0);
+                    obj[x1][yMin + i] = obj[x1][yMin + i] + 1;
+                }
+            } else {
+                for (let i = 0; i <= xDistance; i++) {
+                    obj[xMin + i] = obj[xMin + i] ?? [];
+                    obj[xMin + i][y1] = obj[xMin + i][y1] ?? 0;
+
+                    obj[xMin + i][y1] = obj[xMin + i][y1] + 1;
+                }
             }
-        } else {
+        } else if (calcDiagonal) {
             for (let i = 0; i <= xDistance; i++) {
-                obj[xMin + i] = obj[xMin + i] ?? [];
-                obj[xMin + i][y1] = obj[xMin + i][y1] ?? 0;
+                const x = x1 > x2 ? x1 - i : x1 + i;
+                const y = y1 > y2 ? y1 - i : y1 + i;
 
-                obj[xMin + i][y1] = obj[xMin + i][y1] + 1;
+                obj[x] = obj[x] ?? [];
+                obj[x][y] = obj[x][y] ?? 0;
 
-                obj[xMin + i] = JSON.parse(JSON.stringify(obj[xMin + i])).map((e) => e ?? 0);
+                obj[x][y] = obj[x][y] + 1;
             }
-        }
-    } else {
-        console.log(xDistance === yDistance);
-        for (let i = 0; i <= xDistance; i++) {
-            obj[xMin + i] = obj[xMin + i] ?? [];
-            obj[xMin + i][yMin + i] = obj[xMin + i][yMin + i] ?? 0;
-
-            obj[xMin + i][yMin + i] = obj[xMin + i][yMin + i] + 1;
-
-            obj[xMin + i] = JSON.parse(JSON.stringify(obj[xMin + i])).map((e) => e ?? 0);
-        }
-    }
-});
-console.log('obj', obj);
-const k = Object.keys(obj);
-let sum = 0;
-k.forEach((e) => {
-    obj[e].forEach((n) => {
-        if (n > 1) {
-            sum = sum + 1;
         }
     });
-});
-console.log('sum', sum);
+
+    let sum = 0;
+    Object.keys(obj).forEach((e) => {
+        obj[e].forEach((n) => {
+            if (n > 1) {
+                sum = sum + 1;
+            }
+        });
+    });
+    return sum;
+};
+
+console.log('part1: ', solve(false));
+console.log('part2: ', solve(true));
