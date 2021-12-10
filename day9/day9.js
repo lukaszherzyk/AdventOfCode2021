@@ -29,9 +29,6 @@ const lowPointsCords = () => {
     }
     return lowPoints;
 };
-const part1 = () => {
-    return lowPointsCords().reduce((prev, curr) => prev + input[curr[0]][curr[1]] + 1, 0);
-};
 
 const shouldAddToQueue = (n, cords, visited, queue) => {
     if (
@@ -41,7 +38,6 @@ const shouldAddToQueue = (n, cords, visited, queue) => {
     ) {
         return false;
     }
-
     return true;
 };
 
@@ -49,7 +45,6 @@ const dfs = (grid, start) => {
     const visited = [];
     const queue = [start];
 
-    const vals = [];
     while (queue.length !== 0) {
         const el = queue.pop();
         visited.push(el);
@@ -57,7 +52,6 @@ const dfs = (grid, start) => {
         const up = grid[el[0] - 1]?.[el[1]];
         const upCords = [el[0] - 1, el[1]];
         if (shouldAddToQueue(up, upCords, visited, queue)) {
-            vals.push(up);
             queue.push(upCords);
         }
 
@@ -82,6 +76,11 @@ const dfs = (grid, start) => {
     }
     return visited.length;
 };
+
+const part1 = () => {
+    return lowPointsCords().reduce((prev, curr) => prev + input[curr[0]][curr[1]] + 1, 0);
+};
+
 const part2 = () => {
     const cords = lowPointsCords()
         .map((cords) => dfs(input, cords))
