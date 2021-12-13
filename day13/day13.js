@@ -33,27 +33,24 @@ const printGrid = (pattern) => {
     });
     process.stdout.write('===========\n');
 };
+const dot = '█';
+const empty = ' ';
 
 foldPieces = (p1, p2, direction) => {
-    // console.log(p1.length === p2.length);
-    // console.log({ p1: p1.length, p2: p2.length });
-    // console.log(p1[0].length === p2[0].length);
-    // console.log('direction', direction);
-    // console.log('\n\n');
     if (direction === 'y') {
         return p1.map((row, rowIndex) => {
             return row.map((element, elementIndex) => {
-                return element === '█' || p2[p2.length - rowIndex - 1][elementIndex] === '█'
-                    ? '█'
-                    : ' ';
+                return element === dot || p2[p1.length - rowIndex - 1]?.[elementIndex] === dot
+                    ? dot
+                    : empty;
             });
         });
     }
     return p1.map((row, rowIndex) => {
         return row.map((element, elementIndex) => {
-            return element === '█' || p2[rowIndex][p2[rowIndex].length - elementIndex - 1] === '█'
-                ? '█'
-                : ' ';
+            return element === dot || p2[rowIndex]?.[p2[rowIndex].length - elementIndex - 1] === dot
+                ? dot
+                : empty;
         });
     });
 };
@@ -62,7 +59,7 @@ const countDots = (pattern) => {
     let counter = 0;
     pattern.forEach((r) => {
         r.forEach((e) => {
-            if (e === '#') {
+            if (e === dot) {
                 counter = counter + 1;
             }
         });
@@ -89,47 +86,42 @@ const solution = () => {
 
     cords.forEach(([x, y]) => {
         pattern[y] = pattern[y] || [];
-        pattern[y][x] = '█';
+        pattern[y][x] = dot;
         rowLength = pattern[y].length > rowLength ? pattern[y].length : rowLength;
         colLength = pattern.length > colLength ? pattern.length : colLength;
     });
 
     pattern = JSON.parse(JSON.stringify(pattern)).map((e) => {
         if (!e) {
-            return new Array(rowLength).fill(' ');
+            return new Array(rowLength).fill(empty);
         }
         if (e.length < rowLength) {
-            return [...e.map((c) => c || ' '), ...new Array(rowLength - e.length).fill(' ')];
+            return [...e.map((c) => c || empty), ...new Array(rowLength - e.length).fill(empty)];
         }
-        return e.map((c) => c || ' ');
+        return e.map((c) => c || empty);
     });
     fold.forEach((f, index) => {
-        // console.log('pattern length', pattern.length);
         const foldDirection = f[0];
         const foldValue = f[1];
-        p1 =
-            foldDirection === 'y'
-                ? pattern.slice(0, foldValue)
-                : pattern.map((row) => {
-                      return row.slice(0, foldValue);
-                  });
-        p2 =
-            foldDirection === 'y'
-                ? pattern.slice(foldValue)
-                : pattern.map((row) => {
-                      return row.slice(foldValue);
-                  });
+        const isYFold = foldDirection === 'y';
+        p1 = isYFold
+            ? pattern.slice(0, foldValue)
+            : pattern.map((row) => {
+                  return row.slice(0, foldValue);
+              });
+        p2 = isYFold
+            ? pattern.slice(foldValue + 1)
+            : pattern.map((row) => {
+                  return row.slice(foldValue + 1);
+              });
 
         pattern = foldPieces(p1, p2, foldDirection);
-        // console.log('1:');
-        // printGrid(p1);
-        // console.log('2:');
-        // printGrid(p2);
         if (index === 0) {
             part1 = countDots(pattern);
         }
     });
-    //console.log('part1:', part1);
+    console.log('part1:', part1);
+    console.log('part2:');
     printGrid(pattern);
 };
 solution();
